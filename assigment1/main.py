@@ -27,7 +27,7 @@ def rosenblad(p: int, n: int, max_epochs: int = 100) -> bool:
 
     for _ in range(max_epochs):
         for j in range(p):
-            e = np.dot(weights, xi[j]) * labels[j]
+            e = np.dot(weights, xi[j]) * labels[j] #P: is het niet e = np.dot(weights, xi[j] * labels[j])? of is dat hetzelfde?
 
             if e <= 0:
                 weights = weights + 1/n * (xi[j] * labels[j])
@@ -48,7 +48,7 @@ def run(all_n, alpha, max_epoch=100, n_runs = 50):
     for n in all_n:
         print("now doing n = ", n)
         # P is defined as a function of alpha * N
-        all_p = np.round(n * alpha)
+        all_p = np.round(n * alpha)                 
 
         for p, current_alpha in zip(all_p, alpha):
             successes = []
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     all_n = [20, 40, 60, 80, 100]
     # Alpha (0.75, 1 ... 3) as defined in experiment
-    alpha = np.arange(0.75, 3.01, 0.10)
+    alpha = np.arange(0.75, 3.01, 0.10)                 #P: je moet toch alpha berekenen -> alpha = P/N   
 
     result = run(all_n, alpha, n_runs=100)
 
