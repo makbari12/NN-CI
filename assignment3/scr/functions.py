@@ -7,8 +7,8 @@ import random
 #TODO: add n_test??
 def load_data(n_train=5000):
     # n_data gives the number of instances to use
-    xi = pd.read_csv("./data/xi.csv")
-    tau = pd.read_csv("./data/tau.csv")
+    xi = pd.read_csv("../data/xi.csv")
+    tau = pd.read_csv("../data/tau.csv")
     xi = xi.to_numpy()
     tau = np.array(list(tau))
     xi_train = xi[:,0:n_train]
@@ -33,11 +33,15 @@ def initialize_weights(k, N):
 def calculate_output(k, xi, w):
     sigma = 0
     for i in range(k):
-        sigma += math.tanh(np.dot(w[:,i], xi))    # no v_k because v_k is 1
+        sigma += np.tanh(np.dot(w[:,i], xi))    # no v_k because v_k is 1
     return sigma
 
 def calculate_error(sigma, tau):
-    return ((sigma - tau)**2)/2
+    return np.mean(1/2 * (sigma - tau.astype(float)) ** 2)
+
+def calculate_gradient(xi,sigma, tau, w):
+    gradient = (sigma - tau) * (1 - np.tanh(w.T @ xi.reshape(-1, 1))**2)
+    return gradient
 
 def calculate_learning_step(xi_train, tau_train, w, learning_rate):
     # select random example
@@ -50,19 +54,25 @@ def calculate_learning_step(xi_train, tau_train, w, learning_rate):
         
     # calculate error
     error = calculate_error(sigma, tau)
-    
+
     print("sigma: ", sigma, " tau: ", tau, " error: ", error)
-    
+
     # calculate gradient
-    # update weights
-    
+    partial_gradients = calculate_gradient(xi, sigma, tau, w)
+
+    # update weights 
+    for i in range(len(partial_gradients)):
+        g = partial_gradients[i] * xi
+        w[:,i] -= learning_rate * g * error
     return w
 
 def sgd_training(xi_train, tau_train, n_epochs=50, learning_rate=0.05, k=2):
     # initialize weights
     w = initialize_weights(k, len(xi_train))
-    
+    errors = []
     for i in range(n_epochs):
         w = calculate_learning_step(xi_train=xi_train, tau_train=tau_train, w=w, learning_rate=learning_rate)
-        
-    return
+        sigma_train = calculate_output(k=np.shape(w)[1], xi=xi_train, w=w)
+        error_train = calculate_error(sigma_train, tau_train)
+        errors.append(error_train)
+    return w, errors
