@@ -52,7 +52,7 @@ def calculate_gradient(xi,sigma, tau, w):
 
 def calculate_learning_step(xi_train, tau_train, w, learning_rate):
     # select random example
-    idx = random.randint(0, len(xi_train))
+    idx = random.randint(0, np.shape(xi_train)[1]-1)
     xi = xi_train[:, idx]
     tau = tau_train[0,idx]   
     
@@ -79,8 +79,8 @@ def sgd_training(xi_train, tau_train, xi_test, tau_test, n_epochs=500, learning_
     test_errors = []
     for i in range(n_epochs):
         w = calculate_learning_step(xi_train=xi_train, tau_train=tau_train, w=w, learning_rate=learning_rate)
-        # calculate errors each P steps
-        if i % np.shape(tau_train)[1] == 0:
+        # calculate errors each 100 steps (so that even dim. of error vectors eventually)
+        if i % 100 == 0:        
             sigma_train = calculate_output(k=2, xi=xi_train, w=w)
             error_train = calculate_error(sigma_train, tau_train)
             errors.append(error_train)
