@@ -4,7 +4,6 @@ import math
 import random
 
 # function to load the data
-#TODO: add n_test??
 def load_data(n_train=100, n_test=100):
     # n_data gives the number of instances to use
     xi = pd.read_csv("./data/xi.csv")
@@ -30,7 +29,7 @@ def initialize_weights(k, N, seed=0):
         w[:,i] = w_unit
     return w  
 
-def calculate_output(k, xi, w):
+def calculate_output(xi, w, k=2):
     sigma = 0
     for i in range(k):
         sigma += np.tanh(np.dot(w[:,i], xi))    # no v_k because v_k is 1
@@ -81,10 +80,10 @@ def sgd_training(xi_train, tau_train, xi_test, tau_test, n_epochs=500, learning_
         w = calculate_learning_step(xi_train=xi_train, tau_train=tau_train, w=w, learning_rate=learning_rate)
         # calculate errors each 100 steps (so that even dim. of error vectors eventually)
         if i % 100 == 0:        
-            sigma_train = calculate_output(k=2, xi=xi_train, w=w)
+            sigma_train = calculate_output(xi=xi_train, w=w)
             error_train = calculate_error(sigma_train, tau_train)
             errors.append(error_train)
-            sigma_test = calculate_output(k=2, xi=xi_test, w=w)
+            sigma_test = calculate_output(xi=xi_test, w=w)
             error = calculate_error(sigma_test, tau_test)
             test_errors.append(error)
     return w, errors, test_errors
