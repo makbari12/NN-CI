@@ -63,7 +63,7 @@ for n_train in P_sizes:
 plt.rcParams['figure.figsize'] = (6, 4)
 for i in range(np.shape(train_errors)[0]):    
     plt.plot(x, train_errors[i,:])
-plt.legend(['P=20', 'P=50', 'P=100', 'P=200', 'P=500', 'P=1000', 'P=2000'])
+plt.legend(['P=20', 'P=50', 'P=200', 'P=500', 'P=1000', 'P=2000'])
 plt.title("Training error for different P's")
 plt.xlabel("Epoch")
 plt.ylabel("Error")
@@ -72,7 +72,7 @@ plt.show()
 
 for i in range(np.shape(test_errors)[0]):    
     plt.plot(x, test_errors[i,:])
-plt.legend(['P=20', 'P=50', 'P=100', 'P=200', 'P=500', 'P=1000', 'P=2000'])
+plt.legend(['P=20', 'P=50', 'P=200', 'P=500', 'P=1000', 'P=2000'])
 plt.title("Test error for different P's")
 plt.xlabel("Epoch")
 plt.ylabel("Error")
