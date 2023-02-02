@@ -1,30 +1,34 @@
 from scr.functions import *
-from scr.functions import *
+from scr.settings import *
 import matplotlib.pyplot as plt
 
-# some settings
-N_EPOCHS = 5000
+# for plotss
 epoch = 0
 x = np.linspace(0, N_EPOCHS, int(N_EPOCHS/100))
 
 ###################### General Test of the network ###########################
 
 # load data
-xi_train, tau_train, xi_test, tau_test = load_data(n_train=500, n_test=100)
+xi_train, tau_train, xi_test, tau_test = load_data(n_train=P, n_test=Q)
 
 # perform SGD
 errors = []
 test_errors = []
 print("----------- train and test network -------------")
-for i in range(5):
+for i in range(N_RUNS):
     print("---------- run ", i, "---------------")
     w, err, test_err = sgd_training(xi_train=xi_train, tau_train=tau_train, xi_test=xi_test,
-                                    tau_test=tau_test, n_epochs=N_EPOCHS)
+                                    tau_test=tau_test, n_epochs=N_EPOCHS, learning_rate=LR, k=K)
     errors.append(err)
     test_errors.append(test_err)
 
 mean_train_error = np.mean(errors, 0)
 mean_test_error = np.mean(test_errors,0)
+
+print("train error: ", mean_train_error[len(mean_train_error)-1], "test error: ", 
+      mean_test_error[len(mean_test_error)-1])
+
+np.savetxt('w.txt', w) # to load again use w = np.loadtxt('w.txt', delimiter=' ')
 
 # plot
 plt.rcParams['figure.figsize'] = (8, 4)
@@ -34,44 +38,45 @@ plt.legend()
 plt.title("Training and test error")
 plt.xlabel("Epoch")
 plt.ylabel("Error")
-#plt.savefig('traintest.png') 
+plt.savefig('traintest.png') 
 plt.show()
 
-############################ Test different P's ##############################
+# ############################ Test different P's ##############################
 
 print('-------------- Test different Ps -------------------')
-P = [20, 50, 200, 500, 1000, 2000]
+P_sizes = [20, 50, 200, 500, 1000, 2000]
 train_errors = []
 test_errors=[]
-for n_train in P:
+for n_train in P_sizes:
     print('---------------- P = ', n_train, ' ------------------')
-    xi_train, tau_train, xi_test, tau_test = load_data(n_train=n_train, n_test=200)
+    xi_train, tau_train, xi_test, tau_test = load_data(n_train=n_train, n_test=Q)
     w, err, test_err = sgd_training(xi_train=xi_train, tau_train=tau_train, xi_test=xi_test,
-                                    tau_test=tau_test, n_epochs=N_EPOCHS)
+                                    tau_test=tau_test, n_epochs=N_EPOCHS, learning_rate=LR, k=K)
     if n_train is 20:
         train_errors = err
         test_errors = test_err   
     else:
         train_errors = np.vstack([train_errors, err])
         test_errors = np.vstack([test_errors, test_err])
+    print("train error: ", err[len(err)-1], "test error: ", test_err[len(test_err)-1])
 
 plt.rcParams['figure.figsize'] = (6, 4)
 for i in range(np.shape(train_errors)[0]):    
     plt.plot(x, train_errors[i,:])
-plt.legend(['P=20', 'P=50', 'P=50', 'P=200', 'P=500', 'P=1000', 'P=2000'])
+plt.legend(['P=20', 'P=50', 'P=100', 'P=200', 'P=500', 'P=1000', 'P=2000'])
 plt.title("Training error for different P's")
 plt.xlabel("Epoch")
 plt.ylabel("Error")
-#plt.savefig('train_differentp.png') 
+plt.savefig('train_differentp.png') 
 plt.show()
 
 for i in range(np.shape(test_errors)[0]):    
     plt.plot(x, test_errors[i,:])
-plt.legend(['P=20', 'P=50', 'P=50', 'P=200', 'P=500', 'P=1000', 'P=2000'])
+plt.legend(['P=20', 'P=50', 'P=100', 'P=200', 'P=500', 'P=1000', 'P=2000'])
 plt.title("Test error for different P's")
 plt.xlabel("Epoch")
 plt.ylabel("Error")
-#plt.savefig('test_differentp.png') 
+plt.savefig('test_differentp.png') 
 plt.show()
 
 ########################### Test different constants learning rates ###########################
@@ -82,15 +87,16 @@ train_errors = []
 test_errors=[]
 for lr in learning_rates:
     print('---------------- lr = ', lr, ' ------------------')
-    xi_train, tau_train, xi_test, tau_test = load_data(n_train=800, n_test=200)
+    xi_train, tau_train, xi_test, tau_test = load_data(n_train=P, n_test=Q)
     w, err, test_err = sgd_training(xi_train=xi_train, tau_train=tau_train, xi_test=xi_test,
-                                    tau_test=tau_test, n_epochs=N_EPOCHS, learning_rate=lr)
+                                    tau_test=tau_test, n_epochs=N_EPOCHS, learning_rate=lr, k=K)
     if lr is learning_rates[0]:
         train_errors = err
         test_errors = test_err   
     else:
         train_errors = np.vstack([train_errors, err])
         test_errors = np.vstack([test_errors, test_err])
+    print("train error: ", err[len(err)-1], "test error: ", test_err[len(test_err)-1])
 
 for i in range(np.shape(train_errors)[0]):    
     plt.plot(x, train_errors[i,:])
@@ -98,7 +104,7 @@ plt.legend(['lr=0.001', 'lr=0.005', 'lr=0.01', 'lr=0.05', 'lr=0.1', 'lr=0.5'])
 plt.title("Training error for different learning rates")
 plt.xlabel("Epoch")
 plt.ylabel("Error")
-#plt.savefig('train_differentlr.png') 
+plt.savefig('train_differentlr.png') 
 plt.show()
 
 for i in range(np.shape(test_errors)[0]):    
@@ -107,7 +113,7 @@ plt.legend(['lr=0.001', 'lr=0.005', 'lr=0.01', 'lr=0.05', 'lr=0.1', 'lr=0.5'])
 plt.title("Test error for different learning rates")
 plt.xlabel("Epoch")
 plt.ylabel("Error")
-#plt.savefig('test_differentlr.png') 
+plt.savefig('test_differentlr.png') 
 plt.show()
 
 # add learning_rate(t) = a/(b+t)?
