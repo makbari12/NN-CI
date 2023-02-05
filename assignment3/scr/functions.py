@@ -89,5 +89,5 @@ def sgd_training(xi_train, tau_train, xi_test, tau_test, n_epochs=500, learning_
             error = calculate_error(sigma_test, tau_test)
             test_errors.append(error)
         if lr_schedule:
-            learning_rate = learning_rate_schedule(i, learning_rate, d=0.005)
+            learning_rate = learning_rate_schedule(i, learning_rate, d=0.00001)
     return w, errors, test_errors
