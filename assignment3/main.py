@@ -117,6 +117,61 @@ plt.savefig('test_differentlr.png')
 plt.show()
 
 # add learning_rate(t) = a/(b+t)?
+########################### Test learningrate schedule ###########################
+print('-------------- Test different Ps -------------------')
+P_sizes = [20, 50, 200, 500, 1000, 2000]
+train_errors = []
+test_errors=[]
+for n_train in P_sizes:
+    print('---------------- P = ', n_train, ' ------------------')
+    xi_train, tau_train, xi_test, tau_test = load_data(n_train=n_train, n_test=Q)
+    w, err, test_err = sgd_training(xi_train=xi_train, tau_train=tau_train, xi_test=xi_test,
+                                    tau_test=tau_test, n_epochs=N_EPOCHS, learning_rate=LR, k=K, lr_schedule=True)
+    if n_train is 20:
+        train_errors = err
+        test_errors = test_err   
+    else:
+        train_errors = np.vstack([train_errors, err])
+        test_errors = np.vstack([test_errors, test_err])
+    print("train error: ", err[len(err)-1], "test error: ", test_err[len(test_err)-1])
+
+plt.rcParams['figure.figsize'] = (6, 4)
+for i in range(np.shape(train_errors)[0]):    
+    plt.plot(x, train_errors[i,:])
+plt.legend(['P=20', 'P=50', 'P=200', 'P=500', 'P=1000', 'P=2000'])
+plt.title("Training error for different P's with learning rate schedule")
+plt.xlabel("Epoch")
+plt.ylabel("Error")
+plt.savefig('train_differentp_schedule.png') 
+plt.show()
+
+for i in range(np.shape(test_errors)[0]):    
+    plt.plot(x, test_errors[i,:])
+plt.legend(['P=20', 'P=50', 'P=200', 'P=500', 'P=1000', 'P=2000'])
+plt.title("Test error for different P's with learning rate schedule")
+plt.xlabel("Epoch")
+plt.ylabel("Error")
+plt.savefig('test_differentp_schedule.png') 
+plt.show()
+
+
+##################### Plots weights ########################
+# barplot of w1 and w2
+w = np.loadtxt('w.txt', delimiter=' ')
+plt.bar(np.arange(w[:,0].size), w[:,0])
+plt.title("Components of w1 vector")
+plt.xlabel("Component")
+plt.ylabel("Value")
+plt.savefig('w1.png')
+plt.show()
+
+plt.bar(np.arange(w[:,1].size), w[:,1])
+plt.title("Components of w2 vector")
+plt.xlabel("Component")
+plt.ylabel("Value")
+plt.savefig('w2.png')
+plt.show()
+
 
 ##################### More plots ########################
 

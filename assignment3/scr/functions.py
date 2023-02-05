@@ -46,8 +46,13 @@ def calculate_test_error(k, xi, tau, w):
     return calculate_error(sigma, tau)
 
 def calculate_gradient(xi,sigma, tau, w):
+    # return 1/2 * np.mean((sigma - tau.astype(float)) ** 2)
+
     gradient = (sigma - tau) * (1 - np.tanh(w.T @ xi.reshape(-1, 1))**2)
     return gradient
+
+def learning_rate_schedule(epoch, curr_lr, d=0.01):
+    return curr_lr/(1 + epoch*d)
 
 def calculate_learning_step(xi_train, tau_train, w, learning_rate):
     # select random example
@@ -57,10 +62,6 @@ def calculate_learning_step(xi_train, tau_train, w, learning_rate):
     
     # calculate sigma
     sigma = calculate_output(k=np.shape(w)[1], xi=xi, w=w)
-        
-    # calculate error
-    error = calculate_error(sigma, tau)
-
     #print("sigma: ", sigma, " tau: ", tau, " error: ", error)
 
     # calculate gradient
@@ -68,16 +69,17 @@ def calculate_learning_step(xi_train, tau_train, w, learning_rate):
     # update weights 
     for i in range(len(partial_gradients)):
         g = partial_gradients[i] * xi
-        w[:,i] -= learning_rate * g * error    # *error?
+        w[:,i] -= learning_rate * g
     return w
 
-def sgd_training(xi_train, tau_train, xi_test, tau_test, n_epochs=500, learning_rate=0.05, seed=0, k=2):
+def sgd_training(xi_train, tau_train, xi_test, tau_test, n_epochs=500, learning_rate=0.05, seed=0, k=2, lr_schedule=False):
     # initialize weights
     w = initialize_weights(k, len(xi_train), seed)
     errors = []
     test_errors = []
     for i in range(n_epochs):
         w = calculate_learning_step(xi_train=xi_train, tau_train=tau_train, w=w, learning_rate=learning_rate)
+
         # calculate errors each 100 steps (so that even dim. of error vectors eventually)
         if i % 100 == 0:        
             sigma_train = calculate_output(xi=xi_train, w=w)
@@ -86,4 +88,6 @@ def sgd_training(xi_train, tau_train, xi_test, tau_test, n_epochs=500, learning_
             sigma_test = calculate_output(xi=xi_test, w=w)
             error = calculate_error(sigma_test, tau_test)
             test_errors.append(error)
+        if lr_schedule:
+            learning_rate = learning_rate_schedule(i, learning_rate, d=0.005)
     return w, errors, test_errors
